@@ -6,6 +6,8 @@ import {
   type StudentFormValues,
 } from "@/lib/schemas/student-schema"
 import { useStudents } from "@/context/StudentsContext"
+import { useMeetings } from "@/context/MeetingsContext"
+import { createMeetingSchedule } from "@/lib/meetings"
 import {
   ACCOMMODATION_OPTIONS,
   STUDENT_STATUS_OPTIONS,
@@ -46,6 +48,7 @@ import { Label } from "@/components/ui/label"
 export default function OnboardStudent() {
   const navigate = useNavigate()
   const { addStudent } = useStudents()
+  const { addMeetingsForStudent } = useMeetings()
 
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
@@ -75,6 +78,7 @@ export default function OnboardStudent() {
       createdAt: new Date().toISOString(),
     }
     addStudent(student)
+    addMeetingsForStudent(createMeetingSchedule(student.id, student.createdAt))
     navigate("/students")
   }
 
