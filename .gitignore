@@ -25,6 +25,9 @@ dist/
 *.swp
 *.swo
 
+# Database
+*.db
+
 # Misc
 .DS_Store
 *.log
