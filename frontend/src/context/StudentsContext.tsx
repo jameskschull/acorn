@@ -8,35 +8,43 @@ import {
 } from "react"
 import type { Student } from "@/types/student"
 
-const STORAGE_KEY = "acorn_students"
-
 interface StudentsContextValue {
   students: Student[]
-  addStudent: (student: Student) => void
+  addStudent: (data: Omit<Student, "id" | "createdAt">) => Promise<Student>
   getStudent: (id: string) => Student | undefined
+  loading: boolean
 }
 
 const StudentsContext = createContext<StudentsContextValue | null>(null)
 
-function loadStudents(): Student[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored ? JSON.parse(stored) : []
-  } catch {
-    return []
-  }
-}
-
 export function StudentsProvider({ children }: { children: ReactNode }) {
-  const [students, setStudents] = useState<Student[]>(loadStudents)
+  const [students, setStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(students))
-  }, [students])
-
-  const addStudent = useCallback((student: Student) => {
-    setStudents((prev) => [...prev, student])
+    fetch("/api/students")
+      .then((res) => res.json())
+      .then((data) => setStudents(data))
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
+
+  const addStudent = useCallback(
+    async (data: Omit<Student, "id" | "createdAt">): Promise<Student> => {
+      const res = await fetch("/api/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        throw new Error("Failed to create student")
+      }
+      const student: Student = await res.json()
+      setStudents((prev) => [student, ...prev])
+      return student
+    },
+    []
+  )
 
   const getStudent = useCallback(
     (id: string) => students.find((s) => s.id === id),
@@ -44,7 +52,7 @@ export function StudentsProvider({ children }: { children: ReactNode }) {
   )
 
   return (
-    <StudentsContext.Provider value={{ students, addStudent, getStudent }}>
+    <StudentsContext.Provider value={{ students, addStudent, getStudent, loading }}>
       {children}
     </StudentsContext.Provider>
   )

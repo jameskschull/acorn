@@ -13,7 +13,6 @@ import {
   STUDENT_STATUS_OPTIONS,
   RACE_OPTIONS,
 } from "@/types/student"
-import type { Student } from "@/types/student"
 
 import {
   Form,
@@ -67,17 +66,14 @@ export default function OnboardStudent() {
     },
   })
 
-  function onSubmit(values: StudentFormValues) {
-    const student: Student = {
+  async function onSubmit(values: StudentFormValues) {
+    const student = await addStudent({
       ...values,
-      id: crypto.randomUUID(),
       iepFileName: values.iepFileName ?? null,
       diagnoses: values.diagnoses ?? "",
       learningGoals: values.learningGoals ?? "",
       additionalContext: values.additionalContext ?? "",
-      createdAt: new Date().toISOString(),
-    }
-    addStudent(student)
+    })
     addMeetingsForStudent(createMeetingSchedule(student.id, student.createdAt))
     navigate("/students")
   }
