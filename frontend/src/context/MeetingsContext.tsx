@@ -12,6 +12,7 @@ import { cascadeMeetingDates } from "@/lib/meetings"
 const STORAGE_KEY = "acorn_meetings"
 
 interface MeetingsContextValue {
+  meetings: Meeting[]
   addMeetingsForStudent: (meetings: Meeting[]) => void
   getMeetingsForStudent: (studentId: string) => Meeting[]
   updateMeeting: (meetingId: string, updates: Partial<Meeting>) => void
@@ -79,6 +80,7 @@ export function MeetingsProvider({ children }: { children: ReactNode }) {
   return (
     <MeetingsContext.Provider
       value={{
+        meetings,
         addMeetingsForStudent,
         getMeetingsForStudent,
         updateMeeting,
